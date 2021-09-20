@@ -20,21 +20,23 @@ ffmpeg_options = {
 
 
 @bot.command()
-async def p(ctx): 
-    file = pafy.new()
-    channel = ctx.message.author.voice.channel
-    voice = discord.utils.get(ctx.guild.voice_channels, name=channel.name)
-    voice_client = discord.utils.get(client.voice_clients, guild=ctx.guild)
+async def p(ctx):
+    file = pafy.new('')
+    
+    if ctx.author.voice is None or ctx.author.voice.channel is None:
+            return await ctx.send('You need to be in a voice channel to use this command!')
 
-    if voice_client is None:
-        voice_client = await voice.connect()
-    else:
-       await voice_client.move_to(channel) 
+    voice_channel = ctx.author.voice.channel
+    if ctx.voice_client is None:
+        vc = await voice_channel.connect()
+    elif ctx.voice_client.channel is ctx.author.voice.channel:
+        await ctx.voice_client.move_to(voice_channel)
+        vc = ctx.voice_client
 
     async with ctx.typing():
         audio = file.getbestaudio()
         source = discord.FFmpegPCMAudio(audio.url, **ffmpeg_options)
-        voice_client.play(source)
+        vc.play(source)
       
 bot.run(TOKEN)
 
